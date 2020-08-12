@@ -24,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+        \App\Message::observe(\App\Observers\MessageObserver::class);
     }
 }
