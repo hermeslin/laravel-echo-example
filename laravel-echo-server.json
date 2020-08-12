@@ -1,37 +1,41 @@
 {
-	"authHost": "",
-	"authEndpoint": "/broadcasting/auth",
-	"clients": [
-		{
-			"appId": "d75a5b003491004d",
-			"key": "49161aedb5ccce7980ca3628beea434e"
-		}
-	],
-	"database": "redis",
-	"databaseConfig": {
-		"redis": {},
-		"sqlite": {
-			"databasePath": "/database/laravel-echo-server.sqlite"
-		}
-	},
-	"devMode": true,
-	"host": null,
-	"port": "6001",
-	"protocol": "http",
-	"socketio": {},
-	"secureOptions": 67108864,
-	"sslCertPath": "",
-	"sslKeyPath": "",
-	"sslCertChainPath": "",
-	"sslPassphrase": "",
-	"subscribers": {
-		"http": true,
-		"redis": true
-	},
-	"apiOriginAllow": {
-		"allowCors": true,
-		"allowOrigin": "http://lvecho.test:80",
-		"allowMethods": "GET, POST",
-		"allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
-	}
+  "authHost": "http://lvecho.test",
+  "authEndpoint": "/broadcasting/auth",
+  "clients": [
+    {
+      "appId": "d75a5b003491004d",
+      "key": "49161aedb5ccce7980ca3628beea434e"
+    }
+  ],
+  "database": "redis",
+  "databaseConfig": {
+    "redis": {
+      "port": "6379",
+      "host": "redis",
+      "keyPrefix": "idfk-"
+    },
+    "sqlite": {
+      "databasePath": "/database/laravel-echo-server.sqlite"
+    }
+  },
+  "devMode": true,
+  "host": null,
+  "port": "6001",
+  "protocol": "http",
+  "socketio": {},
+  "secureOptions": 67108864,
+  "sslCertPath": "",
+  "sslKeyPath": "",
+  "sslCertChainPath": "",
+  "sslPassphrase": "",
+  "subscribers": {
+    "http": true,
+    "redis": true
+  },
+  "apiOriginAllow": {
+    "allowCors": true,
+    "allowOrigin": "http://lvecho.test:80",
+    "allowMethods": "GET, POST",
+    "allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+  }
 }
