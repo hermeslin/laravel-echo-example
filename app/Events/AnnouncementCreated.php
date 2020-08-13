@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 class AnnouncementCreated implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets;
     /**
      * The name of the queue on which to place the event.
      *
@@ -33,7 +33,7 @@ class AnnouncementCreated implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(\App\Message $message)
+    public function __construct($message)
     {
         //
         $this->message = $message;

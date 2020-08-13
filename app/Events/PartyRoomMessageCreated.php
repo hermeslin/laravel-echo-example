@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 class PartyRoomMessageCreated implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets;
 
     /**
      * The name of the queue on which to place the event.
@@ -34,7 +34,7 @@ class PartyRoomMessageCreated implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(\App\Message $message)
+    public function __construct($message)
     {
         // hide some unnecessary information
         $this->message = $message;
