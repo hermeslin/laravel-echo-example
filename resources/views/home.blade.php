@@ -21,53 +21,54 @@
     </div>
     <hr>
     <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Announcement</div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Announcement</div>
 
-                    <div class="card-body">
-                        <div id="announcement-list" class="overflow-auto" style="height:100px;">
-                            <p>[2020-10-10 00:00:00] hi there, welcome to echo server</p>
-                        </div>
-                    </div>
-
-                    <div class="card-footer text-muted">
-                        <div class="input-group">
-                            <input id="announcement-message" type="text" class="form-control" placeholder="Announcement Message" aria-label="Announcement Message">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="send-announcement-message">Send</button>
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <div id="announcement-list" class="overflow-auto" style="height:100px;">
+                        <p>[2020-10-10 00:00:00] hi there, welcome to echo server</p>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
-                    <span id="chat-room-user-count"></span>
-                </div>
 
-                    <div class="card-body">
-                        <div id="chat-room-message-list" class="overflow-auto" style="height:100px;">
-                        </div>
-                    </div>
-
-                    <div class="card-footer text-muted">
-                        <div class="input-group">
-                            <input id="chat-room-message" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-api">Send Via Api</button>
-                                <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-socket">Send Via Socket</button>
-                            </div>
+                <div class="card-footer text-muted">
+                    <div class="input-group">
+                        <input id="announcement-message" type="text" class="form-control" placeholder="Announcement Message" aria-label="Announcement Message">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="send-announcement-message">Send</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <hr>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
+                <span id="chat-room-user-count"></span>
+            </div>
+
+                <div class="card-body">
+                    <div id="chat-room-message-list" class="overflow-auto" style="height:100px;">
+                    </div>
+                </div>
+
+                <div class="card-footer text-muted">
+                    <div class="input-group">
+                        <input id="chat-room-message" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-api">Send Via Api</button>
+                            <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-socket">Send Via Socket</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('js')
