@@ -26,22 +26,6 @@ class PartyRoomMessageChannel
      */
     public function join(User $user, $partyId, $roomId)
     {
-        //
-        $list = [
-            // party_id
-            '1' => [
-                // room_id
-                '1' => [
-                    // user.role_id
-                    '3', '7'
-                ]
-            ],
-        ];
-
-        $userIdList = $list[$partyId][$roomId];
-        if (is_array($userIdList) && count($userIdList) > 0) {
-            return in_array($user->role_id, $userIdList);
-        }
-        return false;
+        return $user->canJoin($partyId, $roomId);
     }
 }
