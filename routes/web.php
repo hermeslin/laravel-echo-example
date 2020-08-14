@@ -15,6 +15,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// it generates all the routes required for user authentication
+// e.g.
+// 1. Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+// 2. Route::post('register', 'Auth\RegisterController@register');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::middleware('auth')->group(function () {
+     // under Api folder
+    Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('broadcast-announcement');
+});

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -23,9 +24,14 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home', [
-            'partyId' => '1',
-            'roomId' => '1'
-        ]);
+        $user = Auth::user();
+        $partyId = 1;
+        $roomId = 1;
+
+        return view('home', compact(
+            'user',
+            'partyId',
+            'roomId'
+        ));
     }
 }
