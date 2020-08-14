@@ -129,10 +129,10 @@
             console.log(`${users.length} user(s) in this chat room`);
         })
         .joining((user) => {
-            console.log(`${users.name} join this room`);
+            console.log(`${user.name} join this room`);
         })
         .leaving((user) => {
-            console.log(`${users.name} join has left this room`);
+            console.log(`${user.name} join has left this room`);
         })
         .listen('.party.room.message.created', (event) => {
 
