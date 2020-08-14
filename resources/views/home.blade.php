@@ -129,10 +129,40 @@
             console.log(`${users.length} user(s) in this chat room`);
         })
         .joining((user) => {
+            const childP = (message) => {
+                const msgId =`chat-room-message-${message.id}`;
+                const msgFormat = `[${message.created_at}] ${message.sender_name} join this room`;
+                const chatroomMessage = document.createTextNode(msgFormat);
+
+                const elementP = document.createElement('p');
+                elementP.setAttribute('id', msgId);
+                elementP.appendChild(chatroomMessage);
+                return elementP;
+            };
+
+            const chatRoomMessageList = document.querySelector('#chat-room-message-list');
+            chatRoomMessageList.appendChild(childP(event));
+            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
+
             console.log(`${user.name} join this room`);
         })
         .leaving((user) => {
-            console.log(`${user.name} join has left this room`);
+            const childP = (message) => {
+                const msgId =`chat-room-message-${message.id}`;
+                const msgFormat = `[${message.created_at}] ${message.sender_name}  has left this room`;
+                const chatroomMessage = document.createTextNode(msgFormat);
+
+                const elementP = document.createElement('p');
+                elementP.setAttribute('id', msgId);
+                elementP.appendChild(chatroomMessage);
+                return elementP;
+            };
+
+            const chatRoomMessageList = document.querySelector('#chat-room-message-list');
+            chatRoomMessageList.appendChild(childP(event));
+            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
+
+            console.log(`${user.name} has left this room`);
         })
         .listen('.party.room.message.created', (event) => {
 
@@ -149,7 +179,7 @@
 
             const chatRoomMessageList = document.querySelector('#chat-room-message-list');
             chatRoomMessageList.appendChild(childP(event));
-            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight
+            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
 
             console.log(`[party.room.message.created] id: ${event.id}, content: ${event.content}`);
         });
