@@ -26,6 +26,14 @@ class PartyRoomMessageChannel
      */
     public function join(User $user, $partyId, $roomId)
     {
-        return $user->canJoin($partyId, $roomId);
+        $result = false;
+        if ($user->canJoin($partyId, $roomId)) {
+            $result = [
+                'id' => $user->id,
+                'name' => $user->name,
+            ];
+        }
+
+        return $result;
     }
 }

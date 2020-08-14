@@ -26,4 +26,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::middleware('auth')->group(function () {
      // under Api folder
     Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('broadcast-announcement');
+    Route::post('/party/{partyId}/room/{roomId}/message', 'PartyRoomMessageController@create')->name('create-party-room-message');
 });

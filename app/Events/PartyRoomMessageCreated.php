@@ -49,6 +49,8 @@ class PartyRoomMessageCreated implements ShouldBroadcast
     {
         return [
             'id' => $this->message->id,
+            'sender_id' => $this->message->sender_id,
+            'sender_name' => $this->message->sender_name,
             'party_id' => $this->message->party_id,
             'room_id' => $this->message->room_id,
             'content' => $this->message->content,
@@ -74,6 +76,6 @@ class PartyRoomMessageCreated implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel("Party.{$this->message->party_id}.Room.{$this->message->room_id}");
+        return new PresenceChannel("Party.{$this->message->party_id}.Room.{$this->message->room_id}");
     }
 }
