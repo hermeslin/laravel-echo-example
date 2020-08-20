@@ -121,67 +121,84 @@
         // Chat room message, it's a presence channel
         const roomId = '{{ $roomId }}';
         const partyId = '{{ $partyId }}';
+        const senderName = '{{ $user->name }}';
+
+        const genMsgNode = ({ id, sender_name, message, created_at }) => {
+            const senderName = (sender_name)
+                ? `${sender_name}: `
+                : '';
+
+            const text = (created_at)
+                ? `[${created_at}] ${message}`
+                : `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${senderName} ${message}`;
+
+            // Unix Millisecond Timestamp
+            const msgId = (id)
+                ? `chat-room-message-${id}`
+                : `chat-room-message-${moment().format('x')}`;
+
+            const elementP = document.createElement('p');
+            const chatroomMessage = document.createTextNode(text);
+
+            elementP.setAttribute('id', msgId);
+            elementP.appendChild(chatroomMessage);
+
+            return elementP;
+        };
+
+        appendMsg = (target, msgNode) => {
+            const chatRoomMessageList = document.querySelector(target);
+            chatRoomMessageList.appendChild(msgNode);
+            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
+        };
+
         Echo.join(`Party.${partyId}.Room.${roomId}`)
         .here((users) => {
             //
             const count = document.createTextNode(`${users.length} user(s)`);
-            document.querySelector('#chat-room-user-count').appendChild(count);
+            const existsNodes =  document.querySelector('#chat-room-user-count').childNodes;
+            if (existsNodes && existsNodes.length > 0) {
+                document.querySelector('#chat-room-user-count').replaceChild(count, existsNodes[0]);
+            } else {
+                document.querySelector('#chat-room-user-count').appendChild(count);
+            }
             console.log(`${users.length} user(s) in this chat room`);
         })
         .joining((user) => {
-            const childP = (user) => {
-                const msgId =`chat-room-message-${Math.floor(Date.now() / 1000)}`;
-                const msgFormat = `${user.name}  join this room`;
-                const chatroomMessage = document.createTextNode(msgFormat);
+            const msgNode = genMsgNode({
+                message: `${user.name} join this room`
+            });
 
-                const elementP = document.createElement('p');
-                elementP.setAttribute('id', msgId);
-                elementP.appendChild(chatroomMessage);
-                return elementP;
-            };
-
-            const chatRoomMessageList = document.querySelector('#chat-room-message-list');
-            chatRoomMessageList.appendChild(childP(user));
-            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
-
+            appendMsg('#chat-room-message-list', msgNode);
             console.log(`${user.name} join this room`);
         })
         .leaving((user) => {
-            const childP = (user) => {
-                const msgId =`chat-room-message-${Math.floor(Date.now() / 1000)}`;
-                const msgFormat = `${user.name}  has left this room`;
-                const chatroomMessage = document.createTextNode(msgFormat);
+            const msgNode = genMsgNode({
+                message: `${user.name}  has left this room`
+            });
 
-                const elementP = document.createElement('p');
-                elementP.setAttribute('id', msgId);
-                elementP.appendChild(chatroomMessage);
-                return elementP;
-            };
-
-            const chatRoomMessageList = document.querySelector('#chat-room-message-list');
-            chatRoomMessageList.appendChild(childP(user));
-            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
-
+            appendMsg('#chat-room-message-list', msgNode);
             console.log(`${user.name} has left this room`);
         })
         .listen('.party.room.message.created', (event) => {
+            const msgNode = genMsgNode({
+                id: message.id,
+                sender_name: message.sender_name,
+                message: message.content,
+                created_at: message.created_at
+            });
 
-            const childP = (message) => {
-                const msgId =`chat-room-message-${message.id}`;
-                const msgFormat = `[${message.created_at}] ${message.sender_name}: ${message.content}`;
-                const chatroomMessage = document.createTextNode(msgFormat);
-
-                const elementP = document.createElement('p');
-                elementP.setAttribute('id', msgId);
-                elementP.appendChild(chatroomMessage);
-                return elementP;
-            };
-
-            const chatRoomMessageList = document.querySelector('#chat-room-message-list');
-            chatRoomMessageList.appendChild(childP(event));
-            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
-
+            appendMsg('#chat-room-message-list', msgNode);
             console.log(`[party.room.message.created] id: ${event.id}, content: ${event.content}`);
+        })
+        .listenForWhisper('send-message-via-socket', (event) => {
+             const msgNode = genMsgNode({
+                sender_name: event.sender_name,
+                message: event.message
+            });
+
+            appendMsg('#chat-room-message-list', msgNode);
+            console.log(`send-message-via-socket: ${event.message}`);
         });
 
         // send chat room message via api contoller
@@ -200,10 +217,34 @@
                     status: response.status,
                     data: response.data.message
                 });
+                document.querySelector('#chat-room-message').value = '';
             } catch (error) {
                  console.log(error);
             }
         });
+
+        document.querySelector('#send-chat-room-message-via-socket')
+        .addEventListener('click', async (event) => {
+            const message = document.querySelector('#chat-room-message').value;
+            if (!message) {
+                return false;
+            }
+
+            const data = {
+                sender_name: senderName,
+                message
+            };
+
+            Echo.join(`Party.${partyId}.Room.${roomId}`)
+           .whisper('send-message-via-socket', data);
+
+            const msgNode = genMsgNode(data);
+            appendMsg('#chat-room-message-list', msgNode);
+
+            document.querySelector('#chat-room-message').value = '';
+        });
+
+
      });
 
 </script>
