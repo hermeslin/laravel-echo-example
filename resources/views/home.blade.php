@@ -129,7 +129,7 @@
                 : '';
 
             const text = (created_at)
-                ? `[${created_at}] ${message}`
+                ? `[${created_at}] ${senderName} ${message}`
                 : `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${senderName} ${message}`;
 
             // Unix Millisecond Timestamp
