@@ -38,3 +38,9 @@ window.Echo = new Echo({
   host: window.location.hostname + ':6001',
   client: socketio,
 });
+
+/**
+ * load moment js
+ */
+import moment from 'moment';
+window.moment = moment;
