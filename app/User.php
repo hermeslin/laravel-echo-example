@@ -60,4 +60,14 @@ class User extends Authenticatable
         }
         return false;
     }
+
+    /**
+     * check user can join party room
+     */
+    public function canUseHorizon()
+    {
+        return in_array($this->id, [
+            2, 15, 41
+        ]);
+    }
 }
