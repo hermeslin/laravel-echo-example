@@ -42,7 +42,7 @@ return [
         ],
 
         'api' => [
-            'driver' => 'token',
+            'driver' => 'passport',
             'provider' => 'users',
             'hash' => false,
         ],
@@ -114,4 +114,15 @@ return [
 
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | OAuth
+    |--------------------------------------------------------------------------
+    |
+    */
+    'oauth' => [
+        'request_token_url' => env('OAUTH_REQUEST_TOKEN_URL', env('APP_URL').'/oauth/token'),
+        'client_id' => env('OAUTH_CLIENT_ID'),
+        'client_secret' => env('OAUTH_CLIENT_SECRET'),
+    ],
 ];
