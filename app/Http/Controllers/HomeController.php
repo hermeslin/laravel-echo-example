@@ -14,7 +14,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->only('index');
     }
 
     /**
@@ -30,6 +30,20 @@ class HomeController extends Controller
 
         return view('home', compact(
             'user',
+            'partyId',
+            'roomId'
+        ));
+    }
+
+    /**
+     *
+     */
+    public function chatWithToken()
+    {
+        $partyId = 1;
+        $roomId = 1;
+
+        return view('chatWithToken', compact(
             'partyId',
             'roomId'
         ));

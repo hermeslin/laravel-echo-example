@@ -22,6 +22,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/chat-with-token', 'HomeController@chatWithToken')->name('chat-with-token');
+Route::post('/user-oauth/exchange-token', 'AuthenticationController@oAutheExchangeToken')->name('oauth-exchange-token');
 
 Route::middleware('auth')->group(function () {
      // under Api folder
