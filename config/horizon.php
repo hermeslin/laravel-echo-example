@@ -157,7 +157,22 @@ return [
                 'tries' => 1,
             ],
         ],
-
+        'stage' => [
+            'supervisor-1' => [
+                'connection' => 'redis',
+                'queue' => ['default'],
+                'balance' => 'simple',
+                'processes' => 3,
+                'tries' => 1,
+            ],
+            'supervisor-2' => [
+                'connection' => 'redis',
+                'queue' => ['socket-broadcast'],
+                'balance' => 'simple',
+                'processes' => 3,
+                'tries' => 1,
+            ],
+        ],
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
