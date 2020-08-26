@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header">Dashboard</div>
                 <div name="exchange-token-block" class="card-body" style="display: block;">
-                    Exchange your token.
+                    Exchange your token first.
                     <form class="form-inline">
                         <input type="text" class="form-control mb-2 mr-sm-2" name="email" required="required" placeholder="Email Address" autocomplete="email" >
                         <input type="password" class="form-control mb-2 mr-sm-2" name="password" required="required" placeholder="Password" autocomplete="current-password">
@@ -80,8 +80,27 @@
 
         const storeInfo = {
             token: null,
+            token: null,
+            announcementSocket: null,
+            chatRoomSocket: null,
         };
 
+        const getSocketIo = ({ host = null, accessToken = null } = {}) => {
+            const url = (host) ?? window.location.hostname + ':6001';
+            const options = {};
+
+            if (accessToken) {
+                options.auth = {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                };
+            }
+
+            return io(url, options);
+        };
+
+        // Exchange access token
         document.querySelector('#exchange-token')
         .addEventListener('click', async (event) => {
             const email = document.querySelector('input[name=email]').value;
@@ -112,6 +131,12 @@
                 document.querySelector('div[name=token-changed-block]')
                 .setAttribute("style", 'display: block;');
 
+                if (!storeInfo.chatRoomSocket) {
+                    storeInfo.chatRoomSocket = getSocketIo({
+                        accessToken: response.data.access_token
+                    })
+                }
+
                 document.querySelector('div[name=exchange-token-block]')
                 .setAttribute("style", 'display: none;');
 
@@ -119,6 +144,77 @@
                 console.log(error);
             }
        });
+
+
+       // Announcement
+       ((storeInfo) => {
+           let socketIo = null;
+           if (!storeInfo.announcementSocket) {
+                storeInfo.announcementSocket = getSocketIo();
+                socketIo = storeInfo.announcementSocket;
+            } else {
+                socketIo = storeInfo.announcementSocket;
+            }
+
+            socketIo.emit('subscribe', {
+                channel: 'App.Announcement',
+                auth: {},
+            });
+
+            socketIo.on('app.announcement.created', (channel, data) => {
+                const childP = (message) => {
+                    const msgId =`announcement-${message.id}`;
+                    const msgFormat = `[${message.created_at}] ${message.content}`;
+                    const announcement = document.createTextNode(msgFormat);
+
+                    const elementP = document.createElement('p');
+                    elementP.setAttribute('id', msgId);
+                    elementP.appendChild(announcement);
+                    return elementP;
+                };
+
+                const announcementList = document.querySelector('#announcement-list');
+                announcementList.appendChild(childP(data));
+                announcementList.scrollTop = announcementList.scrollHeight;
+
+                console.log(`[app.announcement.created] id: ${data.id}, content: ${data.content}`);
+            });
+
+       })(storeInfo);
+
+        // send announcement via api contoller
+        document.querySelector('#send-announcement-message')
+        .addEventListener('click', async (event) => {
+            if (!storeInfo.token) {
+                console.log('exchange your access token first.');
+                return false;
+            }
+
+            const message = document.querySelector('#announcement-message').value;
+            if (!message) {
+                return false;
+            }
+
+            try {
+                const response = await axios.post(
+                    "{{ route('api-broadcast-announcement') }}",
+                    {
+                        message
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${storeInfo.token.access_token}`
+                        }
+                    }
+                );
+                console.log({
+                    status: response.status,
+                    data: response.data.message
+                });
+            } catch (error) {
+                 console.log(error);
+            }
+        });
 
         document.querySelector('#send-chat-room-message-via-api')
         .addEventListener('click', async (event) => {

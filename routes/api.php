@@ -18,8 +18,11 @@ Route::middleware('auth:api')->group(function () {
         return $request->user();
     });
 
+    Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('api-broadcast-announcement');
+
     // under Api folder
     Route::namespace('Api')->group(function () {
+
     });
 });
 
