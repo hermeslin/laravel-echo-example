@@ -80,24 +80,36 @@
 
         const storeInfo = {
             token: null,
-            token: null,
-            announcementSocket: null,
-            chatRoomSocket: null,
+            socketConns: [],
         };
 
-        const getSocketIo = ({ host = null, accessToken = null } = {}) => {
-            const url = (host) ?? window.location.hostname + ':6001';
-            const options = {};
-
+        const buildSocketConnAuthHeader = ({ accessToken = null }) => {
+            let auth = {};
             if (accessToken) {
-                options.auth = {
+                auth = {
                     headers: {
                         Authorization: `Bearer ${accessToken}`
                     }
                 };
             }
+            return auth;
+        };
 
+        const buildSocketConn = ({ host = null, accessToken = null }) => {
+            const url = (host) ?? window.location.hostname + ':6001';
+            const options = {
+                auth: buildSocketConnAuthHeader({ accessToken })
+            };
             return io(url, options);
+        }
+
+        const getSocketConn = ({ name = 'default', host = null, accessToken = null }) => {
+            const existsConn = storeInfo.socketConns[name];
+            if (!existsConn) {
+                storeInfo.socketConns[name] = buildSocketConn({ host, accessToken });
+            }
+
+            return storeInfo.socketConns[name];
         };
 
         // Exchange access token
@@ -148,20 +160,21 @@
 
        // Announcement
        ((storeInfo) => {
-           let socketIo = null;
-           if (!storeInfo.announcementSocket) {
-                storeInfo.announcementSocket = getSocketIo();
-                socketIo = storeInfo.announcementSocket;
-            } else {
-                socketIo = storeInfo.announcementSocket;
-            }
+            const announcementChannel = 'App.Announcement';
+            const auth = {};
+            const socketIo = getSocketConn('announcement');
 
             socketIo.emit('subscribe', {
-                channel: 'App.Announcement',
-                auth: {},
+                channel: announcementChannel,
+                auth,
             });
 
             socketIo.on('app.announcement.created', (channel, data) => {
+                if (channel !== announcementChannel) {
+                    console.log('subscribe wrong channel, wtf?');
+                    return;
+                }
+
                 const childP = (message) => {
                     const msgId =`announcement-${message.id}`;
                     const msgFormat = `[${message.created_at}] ${message.content}`;
