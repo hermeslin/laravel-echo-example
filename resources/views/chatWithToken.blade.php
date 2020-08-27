@@ -79,6 +79,9 @@
      window.addEventListener('DOMContentLoaded', function() {
 
         const storeInfo = {
+            sender: {},
+            roomId: '{{ $roomId }}',
+            partyId: '{{ $partyId }}',
             token: null,
             socketConns: [],
         };
@@ -139,15 +142,19 @@
                     refresh_token: response.data.refresh_token,
                 };
 
+                const userResponse = await axios.get(
+                    "{{ route('api-user') }}",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${storeInfo.token.access_token}`
+                        }
+                    }
+                );
+                storeInfo.sender = userResponse.data;
+
                 document.querySelector('#user-access-token').appendChild(accessTokenText)
                 document.querySelector('div[name=token-changed-block]')
                 .setAttribute("style", 'display: block;');
-
-                if (!storeInfo.chatRoomSocket) {
-                    storeInfo.chatRoomSocket = getSocketIo({
-                        accessToken: response.data.access_token
-                    })
-                }
 
                 document.querySelector('div[name=exchange-token-block]')
                 .setAttribute("style", 'display: none;');
@@ -229,13 +236,70 @@
             }
         });
 
+        // Chat room message, it's a presence channel
+        const genMsgNode = ({ id, sender_name, message, created_at }) => {
+            const senderName = (sender_name)
+                ? `${sender_name}: `
+                : '';
+
+            const text = (created_at)
+                ? `[${created_at}] ${senderName} ${message}`
+                : `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${senderName} ${message}`;
+
+            // Unix Millisecond Timestamp
+            const msgId = (id)
+                ? `chat-room-message-${id}`
+                : `chat-room-message-${moment().format('x')}`;
+
+            const elementP = document.createElement('p');
+            const chatroomMessage = document.createTextNode(text);
+
+            elementP.setAttribute('id', msgId);
+            elementP.appendChild(chatroomMessage);
+
+            return elementP;
+        };
+
+        const appendMsg = (target, msgNode) => {
+            const chatRoomMessageList = document.querySelector(target);
+            chatRoomMessageList.appendChild(msgNode);
+            chatRoomMessageList.scrollTop = chatRoomMessageList.scrollHeight;
+        };
+
+        // send chat room message via api contoller
         document.querySelector('#send-chat-room-message-via-api')
         .addEventListener('click', async (event) => {
             if (!storeInfo.token) {
                 console.log('exchange your access token first.');
                 return false;
             }
-            console.log(`get access token: ${storeInfo.token.access_token}`);
+
+            const message = document.querySelector('#chat-room-message').value;
+            if (!message) {
+                return false;
+            }
+
+            try {
+                const response = await axios.post(
+                    "{{ route('create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}",
+                    {
+                        message
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${storeInfo.token.access_token}`
+                        }
+                    }
+                );
+                console.log({
+                    status: response.status,
+                    data: response.data.message
+                });
+
+                document.querySelector('#chat-room-message').value = '';
+            } catch (error) {
+                 console.log(error);
+            }
         });
      });
 </script>

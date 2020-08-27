@@ -16,7 +16,7 @@ Route::middleware('auth:api')->group(function () {
     // user info
     Route::get('/user', function (Request $request) {
         return $request->user();
-    });
+    })->name('api-user');
 
     Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('api-broadcast-announcement');
 
