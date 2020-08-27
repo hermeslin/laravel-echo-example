@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Broadcasting\BroadcastController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,12 @@ Route::middleware('auth:api')->group(function () {
     })->name('api-user');
 
     Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('api-broadcast-announcement');
+
+    Route::match(
+        ['get', 'post'],
+        '/broadcasting/auth',
+        '\\'.BroadcastController::class.'@authenticate'
+    );
 
     // under Api folder
     Route::namespace('Api')->group(function () {

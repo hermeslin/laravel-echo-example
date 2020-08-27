@@ -125,6 +125,7 @@
             }
 
             try {
+                // echange token
                 const response = await axios.post("{{ route('oauth-exchange-token') }}", {
                     email,
                     password,
@@ -142,6 +143,7 @@
                     refresh_token: response.data.refresh_token,
                 };
 
+                // get user info
                 const userResponse = await axios.get(
                     "{{ route('api-user') }}",
                     {
@@ -151,6 +153,9 @@
                     }
                 );
                 storeInfo.sender = userResponse.data;
+
+                // connet party chat room
+                connectPartyChatRoom();
 
                 document.querySelector('#user-access-token').appendChild(accessTokenText)
                 document.querySelector('div[name=token-changed-block]')
@@ -165,7 +170,7 @@
        });
 
 
-       // Announcement
+       // Announcement channel
        ((storeInfo) => {
             const announcementChannel = 'App.Announcement';
             const auth = {};
@@ -301,6 +306,30 @@
                  console.log(error);
             }
         });
+
+        // party chat room cahnnel
+        const connectPartyChatRoom = () => {
+            const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
+            const auth = buildSocketConnAuthHeader({ accessToken: storeInfo.token.access_token });
+            const socketIo = getSocketConn('party-chat-room');
+
+            socketIo.emit('subscribe', {
+                channel: partyRoomChannel,
+                auth,
+            });
+
+            socketIo.on('party.room.message.created', (channel, message) => {
+                const msgNode = genMsgNode({
+                    id: message.id,
+                    sender_name: message.sender_name,
+                    message: message.content,
+                    created_at: message.created_at
+                });
+
+                appendMsg('#chat-room-message-list', msgNode);
+                console.log(`[party.room.message.created] id: ${message.id}, content: ${message.content}`);
+            });
+        };
      });
 </script>
 @endsection
