@@ -99,7 +99,7 @@
         };
 
         const buildSocketConn = ({ host = null, accessToken = null }) => {
-            const url = (host) ?? window.location.hostname + ':6001';
+            const url = (host) ?? window.location.hostname + ':6002';
             const options = {
                 auth: buildSocketConnAuthHeader({ accessToken })
             };
