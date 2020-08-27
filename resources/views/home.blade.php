@@ -182,10 +182,10 @@
         })
         .listen('.party.room.message.created', (event) => {
             const msgNode = genMsgNode({
-                id: message.id,
-                sender_name: message.sender_name,
-                message: message.content,
-                created_at: message.created_at
+                id: event.id,
+                sender_name: event.sender_name,
+                message: event.content,
+                created_at: event.created_at
             });
 
             appendMsg('#chat-room-message-list', msgNode);
