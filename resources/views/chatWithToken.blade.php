@@ -98,11 +98,10 @@
             return auth;
         };
 
-        const buildSocketConn = ({ host = null, accessToken = null }) => {
-            const url = (host) ?? window.location.hostname + ':6002';
-            const options = {
-                auth: buildSocketConnAuthHeader({ accessToken })
-            };
+        // we dont need auth header when socket connect
+        // more options see https://socket.io/docs/client-initialization/
+        const buildSocketConn = ({ host = null, options = {} }) => {
+            const url = (host) ?? `${window.location.hostname}:6002`;
             return io(url, options);
         }
 
@@ -125,7 +124,7 @@
             }
 
             try {
-                // echange token
+                // exchange token
                 const response = await axios.post("{{ route('oauth-exchange-token') }}", {
                     email,
                     password,
