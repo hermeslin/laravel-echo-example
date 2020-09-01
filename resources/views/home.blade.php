@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Dashboard</div>
 
@@ -21,7 +21,7 @@
     </div>
     <hr>
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Announcement</div>
 
@@ -44,7 +44,7 @@
     </div>
     <hr>
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
@@ -57,10 +57,19 @@
                 </div>
 
                 <div class="card-footer text-muted">
-                    <div class="input-group">
-                        <input id="chat-room-message" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
+                    <div class="input-group mb-2">
+                        <input id="chat-room-message-1" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
+                        <select id="chat-message-brocasting-mode" class="custom-select" id="mode">
+                            <option selected value="horizon">brocast throuth horizon</option>
+                            <option value="directly">brocast directly</option>
+                        </select>
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-api">Send Via Api</button>
+                        </div>
+                    </div>
+                     <div class="input-group">
+                        <input id="chat-room-message-2" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
+                        <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-socket">Send Via Socket</button>
                         </div>
                     </div>
@@ -204,20 +213,29 @@
         // send chat room message via api contoller
         document.querySelector('#send-chat-room-message-via-api')
         .addEventListener('click', async (event) => {
-            const message = document.querySelector('#chat-room-message').value;
+            const messageEle = document.querySelector('#chat-room-message-1');
+            const message = messageEle.value;
             if (!message) {
                 return false;
             }
 
+            const modeEle = document.querySelector('#chat-message-brocasting-mode');
+            const mode = modeEle.options[modeEle.selectedIndex].value;
+            if (!mode) {
+                return false;
+            }
+
             try {
-                const response = await axios.post("{{ route('create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}", {
+                const url = "{{ route('create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}";
+                const response = await axios.post(url, {
+                    mode,
                     message
                 });
                 console.log({
                     status: response.status,
                     data: response.data.message
                 });
-                document.querySelector('#chat-room-message').value = '';
+                messageEle.value = '';
             } catch (error) {
                  console.log(error);
             }
@@ -225,7 +243,8 @@
 
         document.querySelector('#send-chat-room-message-via-socket')
         .addEventListener('click', async (event) => {
-            const message = document.querySelector('#chat-room-message').value;
+            const messageEle = document.querySelector('#chat-room-message-2');
+            const message = messageEle.value;
             if (!message) {
                 return false;
             }
@@ -241,10 +260,8 @@
             const msgNode = genMsgNode(data);
             appendMsg('#chat-room-message-list', msgNode);
 
-            document.querySelector('#chat-room-message').value = '';
+            messageEle.value = '';
         });
-
-
      });
 
 </script>

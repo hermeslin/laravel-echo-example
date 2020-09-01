@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 
 class PartyRoomMessageController extends Controller
 {
@@ -32,6 +33,7 @@ class PartyRoomMessageController extends Controller
                 'partyId' => 'bail|required|in:1',
                 'roomId' => 'bail|required|in:1',
                 'message' => 'bail|required|string|min:1',
+                'mode' => 'bail|required|string|in:directly,horizon'
             ]
         );
 
@@ -52,7 +54,20 @@ class PartyRoomMessageController extends Controller
             'created_at' => $carbonNow,
         ];
 
-        broadcast(new PartyRoomMessageCreated($message));
+        if ($request->mode === 'horizon') {
+            broadcast(new PartyRoomMessageCreated($message));
+        } else {
+            // publish message directly, not through horizon
+            $partyRoomMessageCreatedEvent = new PartyRoomMessageCreated($message);
+            $channel =  $partyRoomMessageCreatedEvent->broadcastOn();
+            $event = $partyRoomMessageCreatedEvent->broadcastAs();
+            $data = $partyRoomMessageCreatedEvent->broadcastWith();
+
+            Redis::publish($channel, json_encode([
+                'event' => $event,
+                'data' => $data,
+            ]));
+        }
 
         return response()->json([
             'status' => 'success',

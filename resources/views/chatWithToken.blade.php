@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Dashboard</div>
                 <div name="exchange-token-block" class="card-body" style="display: block;">
@@ -24,7 +24,7 @@
     </div>
     <hr>
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Announcement</div>
 
@@ -47,7 +47,7 @@
     </div>
     <hr>
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
@@ -60,10 +60,19 @@
                 </div>
 
                 <div class="card-footer text-muted">
-                    <div class="input-group">
-                        <input id="chat-room-message" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
+                    <div class="input-group mb-2">
+                        <input id="chat-room-message-1" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
+                         <select id="chat-message-brocasting-mode" class="custom-select" id="mode">
+                            <option selected value="horizon">brocast throuth horizon</option>
+                            <option value="directly">brocast directly</option>
+                        </select>
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-api">Send Via Api</button>
+                        </div>
+                    </div>
+                     <div class="input-group">
+                        <input id="chat-room-message-2" type="text" class="form-control" placeholder="Type Chat Room Message" aria-label="Type Chat Room Message">
+                        <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="send-chat-room-message-via-socket">Send Via Socket</button>
                         </div>
                     </div>
@@ -173,7 +182,7 @@
        ((storeInfo) => {
             const announcementChannel = 'App.Announcement';
             const auth = {};
-            const socketIo = getSocketConn('announcement');
+            const socketIo = getSocketConn({name: 'announcement'});
 
             socketIo.emit('subscribe', {
                 channel: announcementChannel,
@@ -278,16 +287,25 @@
                 return false;
             }
 
-            const message = document.querySelector('#chat-room-message').value;
+            const messageEle = document.querySelector('#chat-room-message-1');
+
+            const message = messageEle.value;
             if (!message) {
                 return false;
             }
 
+            const modeEle = document.querySelector('#chat-message-brocasting-mode');
+            const mode = modeEle.options[modeEle.selectedIndex].value;
+            if (!mode) {
+                return false;
+            }
+
             try {
-                const response = await axios.post(
-                    "{{ route('create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}",
+                const url  =  "{{ route('create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}"
+                const response = await axios.post(url,
                     {
-                        message
+                        message,
+                        mode
                     },
                     {
                         headers: {
@@ -300,7 +318,7 @@
                     data: response.data.message
                 });
 
-                document.querySelector('#chat-room-message').value = '';
+                messageEle.value = '';
             } catch (error) {
                  console.log(error);
             }
@@ -310,7 +328,7 @@
         const connectPartyChatRoom = () => {
             const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
             const auth = buildSocketConnAuthHeader({ accessToken: storeInfo.token.access_token });
-            const socketIo = getSocketConn('party-chat-room');
+            const socketIo = getSocketConn({name: partyRoomChannel});
 
             socketIo.emit('subscribe', {
                 channel: partyRoomChannel,
@@ -318,6 +336,11 @@
             });
 
             socketIo.on('party.room.message.created', (channel, message) => {
+                if (channel !== partyRoomChannel) {
+                    console.log('subscribe wrong channel, wtf?');
+                    return;
+                }
+
                 const msgNode = genMsgNode({
                     id: message.id,
                     sender_name: message.sender_name,
@@ -326,9 +349,87 @@
                 });
 
                 appendMsg('#chat-room-message-list', msgNode);
-                console.log(`[party.room.message.created] id: ${message.id}, content: ${message.content}`);
+                console.log(`[party.room.message.created] channel: ${channel}, id: ${message.id}, content: ${message.content}`);
+            });
+
+            socketIo.on('client-send-message-via-socket', (channel, data) => {
+                const msgNode = genMsgNode({
+                    sender_name: data.sender_name,
+                    message: data.message
+                });
+
+                appendMsg('#chat-room-message-list', msgNode);
+                console.log(`send-message-via-socket: ${event.message}`);
+            });
+
+            socketIo.on('presence:subscribed', (channel, users) => {
+                const count = document.createTextNode(`${users.length} user(s)`);
+                const existsNodes =  document.querySelector('#chat-room-user-count').childNodes;
+                if (existsNodes && existsNodes.length > 0) {
+                    document.querySelector('#chat-room-user-count').replaceChild(count, existsNodes[0]);
+                } else {
+                    document.querySelector('#chat-room-user-count').appendChild(count);
+                }
+                console.log(`${users.length} user(s) in this chat room`);
+            });
+
+            socketIo.on('presence:joining', (channel, data) => {
+                const msgNode = genMsgNode({
+                    message: `${data.user_info.name} join this room`
+                });
+
+                appendMsg('#chat-room-message-list', msgNode);
+                console.log(`${data.user_info.name} join this room`);
+            });
+
+            socketIo.on('presence:leaving', (channel, data) => {
+                 const msgNode = genMsgNode({
+                    message: `${data.user_info.name}  has left this room`
+                });
+
+                appendMsg('#chat-room-message-list', msgNode);
+                console.log(`${data.user_info.name} has left this room`);
             });
         };
+
+        // send chat room message via socket
+        document.querySelector('#send-chat-room-message-via-socket')
+        .addEventListener('click', async (event) => {
+            if (!storeInfo.token) {
+                console.log('exchange your access token first.');
+                return false;
+            }
+
+            const messageEle = document.querySelector('#chat-room-message-2');
+
+            const message = messageEle.value;
+            if (!message) {
+                console.log('empty message');
+                return false;
+            }
+
+            const data = {
+                sender_name: storeInfo.sender.name,
+                message
+            };
+
+            const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
+            const eventName = 'send-message-via-socket';
+            const socketIo = getSocketConn({name: partyRoomChannel});
+
+            // emit the `client event` will only be broadcast to every sockets but the sender.
+            // ref https://socket.io/docs/server-api/#Flag-%E2%80%98broadcast%E2%80%99
+            // ref https://laravel.com/docs/6.x/broadcasting#client-events
+            socketIo.emit('client event', {
+                channel: partyRoomChannel,
+                event: `client-${eventName}`,
+                data
+            });
+
+            // append message by ourself
+            const msgNode = genMsgNode(data);
+            appendMsg('#chat-room-message-list', msgNode);
+        });
      });
 </script>
 @endsection
