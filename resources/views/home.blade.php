@@ -83,6 +83,11 @@
 @section('js')
 <script>
      window.addEventListener('DOMContentLoaded', function() {
+        const Echo = new laravelEcho({
+            broadcaster: 'socket.io',
+            host: `{{ config('broadcasting.sockets.default.host') }}:{{ config('broadcasting.sockets.default.port') }}`,
+            client: socketio,
+        });
 
         // Announcement
         Echo.channel('App.Announcement')

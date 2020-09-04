@@ -110,8 +110,8 @@
         // we dont need auth header when socket connect
         // more options see https://socket.io/docs/client-initialization/
         const buildSocketConn = ({ host = null, options = {} }) => {
-            const url = (host) ?? `${window.location.hostname}:6002`;
-            return io(url, options);
+            const url = (host) ?? `{{ config('broadcasting.sockets.api_auth.host') }}:{{ config('broadcasting.sockets.api_auth.port') }}`;
+            return socketio(url, options);
         }
 
         const getSocketConn = ({ name = 'default', host = null, accessToken = null }) => {
