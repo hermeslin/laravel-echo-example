@@ -26,7 +26,6 @@ Route::get('/chat-with-token', 'HomeController@chatWithToken')->name('chat-with-
 Route::post('/user-oauth/exchange-token', 'AuthenticationController@oAutheExchangeToken')->name('oauth-exchange-token');
 
 Route::middleware('auth')->group(function () {
-     // under Api folder
     Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('broadcast-announcement');
     Route::post('/party/{partyId}/room/{roomId}/message', 'PartyRoomMessageController@create')->name('create-party-room-message');
 });
