@@ -109,8 +109,13 @@
 
         // we dont need auth header when socket connect
         // more options see https://socket.io/docs/client-initialization/
-        const buildSocketConn = ({ host = null, options = {} }) => {
-            const url = (host) ?? `{{ config('broadcasting.sockets.api_auth.host') }}:{{ config('broadcasting.sockets.api_auth.port') }}`;
+        const buildSocketConn = ({
+            host = null,
+            options = {
+                transports: JSON.parse(decodeURIComponent('{{ rawurlencode(json_encode(config('broadcasting.sockets.default.transports'))) }}'))
+            }
+        }) => {
+            const url = (host) ?? '{{ config('broadcasting.sockets.api_auth.host') }}:{{ config('broadcasting.sockets.api_auth.port') }}';
             return socketio(url, options);
         }
 
@@ -301,7 +306,7 @@
             }
 
             try {
-                const url  =  "{{ route('create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}"
+                const url  =  "{{ route('api-create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}"
                 const response = await axios.post(url,
                     {
                         message,

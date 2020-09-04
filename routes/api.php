@@ -20,6 +20,7 @@ Route::middleware('auth:api')->group(function () {
     })->name('api-user');
 
     Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('api-broadcast-announcement');
+    Route::post('/party/{partyId}/room/{roomId}/message', 'PartyRoomMessageController@create')->name('api-create-party-room-message');
 
     Route::match(
         ['get', 'post'],

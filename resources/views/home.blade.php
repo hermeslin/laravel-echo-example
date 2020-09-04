@@ -86,7 +86,8 @@
         const Echo = new laravelEcho({
             broadcaster: 'socket.io',
             host: `{{ config('broadcasting.sockets.default.host') }}:{{ config('broadcasting.sockets.default.port') }}`,
-            client: socketio,
+            transports: JSON.parse(decodeURIComponent('{{ rawurlencode(json_encode(config('broadcasting.sockets.default.transports'))) }}')),
+            client: socketio
         });
 
         // Announcement
