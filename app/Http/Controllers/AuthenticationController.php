@@ -31,32 +31,32 @@ class AuthenticationController extends Controller
             throw new ApiValidationExcepion($validator);
         }
 
-        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            throw new UserLoginExcepion();
-        }
-
         // exchange access token
         $http = new GuzzleHttp\Client;
 
-        $response = $http->post(config('auth.oauth.request_token_url'), [
-            'form_params' => [
-                'grant_type' => 'password',
-                'client_id' => config('auth.oauth.client_id'),
-                'client_secret' => config('auth.oauth.client_secret'),
-                'username' => $request->email,
-                'password' => $request->password,
-                'scope' => '',
-            ],
-        ]);
-
-        return response()->json(
-            array_merge(
-                [
-                    'status' => 'success',
-                    'message' => 'user authorized.',
+        try {
+            $response = $http->post(config('auth.oauth.request_token_url'), [
+                'form_params' => [
+                    'grant_type' => 'password',
+                    'client_id' => config('auth.oauth.client_id'),
+                    'client_secret' => config('auth.oauth.client_secret'),
+                    'username' => $request->email,
+                    'password' => $request->password,
+                    'scope' => '',
                 ],
-                json_decode((string) $response->getBody(), true)
-            )
-        );
+            ]);
+
+            return response()->json(
+                array_merge(
+                    [
+                        'status' => 'success',
+                        'message' => 'user authorized.',
+                    ],
+                    json_decode((string) $response->getBody(), true)
+                )
+            );
+        } catch (\Exception $exception) {
+            throw new UserLoginExcepion();
+        }
     }
 }
