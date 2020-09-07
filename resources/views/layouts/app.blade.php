@@ -78,4 +78,5 @@
     </div>
 </body>
  @yield('js')
+ <!-- {{ request()->server('SERVER_ADDR') }} -->
 </html>

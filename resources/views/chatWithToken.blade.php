@@ -26,7 +26,15 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Announcement</div>
+                <div class="card-header">
+                    <div>
+                        <div id="announcement-user-socket-id"></div>
+                        <div class="d-flex justify-content-between">
+                            <span>Announcement</span>
+                        </div>
+                    </div>
+
+                </div>
 
                 <div class="card-body">
                     <div id="announcement-list" class="overflow-auto" style="height:100px;">
@@ -49,10 +57,15 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-            <div class="card-header d-flex justify-content-between">
-                <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
-                <span id="chat-room-user-count"></span>
-            </div>
+                <div class="card-header">
+                    <div>
+                        <div id="chatroom-user-socket-id"></div>
+                        <div class="d-flex justify-content-between">
+                            <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
+                            <span id="chat-room-user-count"></span>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card-body">
                     <div id="chat-room-message-list" class="overflow-auto" style="height:100px;">
@@ -187,7 +200,7 @@
        ((storeInfo) => {
             const announcementChannel = 'App.Announcement';
             const auth = {};
-            const socketIo = getSocketConn({name: 'announcement'});
+            const socketIo = getSocketConn({ name: 'announcement' });
 
             socketIo.emit('subscribe', {
                 channel: announcementChannel,
@@ -216,6 +229,12 @@
                 announcementList.scrollTop = announcementList.scrollHeight;
 
                 console.log(`[app.announcement.created] id: ${data.id}, content: ${data.content}`);
+            });
+
+            socketIo.on('connect', (channel, users) => {
+                // show socket id
+                const socketId = document.createTextNode(`socket.id: ${socketIo.id}`);
+                document.querySelector('#announcement-user-socket-id').appendChild(socketId);
             });
 
        })(storeInfo);
@@ -333,7 +352,13 @@
         const connectPartyChatRoom = () => {
             const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
             const auth = buildSocketConnAuthHeader({ accessToken: storeInfo.token.access_token });
-            const socketIo = getSocketConn({name: partyRoomChannel});
+            const socketIo = getSocketConn({ name: partyRoomChannel });
+
+            socketIo.on('connect', (channel, users) => {
+                // show socket id
+                const socketId = document.createTextNode(`socket.id: ${socketIo.id}`);
+                document.querySelector('#chatroom-user-socket-id').appendChild(socketId);
+            });
 
             socketIo.emit('subscribe', {
                 channel: partyRoomChannel,
@@ -420,7 +445,7 @@
 
             const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
             const eventName = 'send-message-via-socket';
-            const socketIo = getSocketConn({name: partyRoomChannel});
+            const socketIo = getSocketConn({ name: partyRoomChannel });
 
             // emit the `client event` will only be broadcast to every sockets but the sender.
             // ref https://socket.io/docs/server-api/#Flag-%E2%80%98broadcast%E2%80%99
