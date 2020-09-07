@@ -45,6 +45,10 @@
                 <div class="card-footer text-muted">
                     <div class="input-group">
                         <input id="announcement-message" type="text" class="form-control" placeholder="Announcement Message" aria-label="Announcement Message">
+                        <select id="announcement-message-brocasting-mode" class="custom-select" id="mode">
+                            <option selected value="horizon">brocast throuth horizon</option>
+                            <option value="directly">brocast directly</option>
+                        </select>
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="send-announcement-message">Send</button>
                         </div>
@@ -252,11 +256,18 @@
                 return false;
             }
 
+            const modeEle = document.querySelector('#announcement-message-brocasting-mode');
+            const mode = modeEle.options[modeEle.selectedIndex].value;
+            if (!mode) {
+                return false;
+            }
+
             try {
                 const response = await axios.post(
                     "{{ route('api-broadcast-announcement') }}",
                     {
-                        message
+                        message,
+                        mode
                     },
                     {
                         headers: {
