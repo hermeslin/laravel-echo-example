@@ -60,8 +60,8 @@ return [
         'default' => [
             'host' =>  env('SOCKET_SERVER', env('APP_URL')),
             'port' =>  env('SOCKET_SERVER_PORT', '6001'),
-            'transports' => ['polling', 'websocket', ],
-            // 'transports' => ['websocket'],
+            // 'transports' => ['polling', 'websocket', ],
+            'transports' => ['websocket'],
         ],
         'api_auth' => [
             'host' =>  env('SOCKET_SERVER_API_AUTH', env('APP_URL')),
