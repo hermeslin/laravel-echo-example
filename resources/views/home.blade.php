@@ -23,7 +23,14 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Announcement</div>
+                <div class="card-header">
+                    <div>
+                        <div id="announcement-user-socket-id"></div>
+                        <div class="d-flex justify-content-between">
+                            <span>Announcement</span>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card-body">
                     <div id="announcement-list" class="overflow-auto" style="height:100px;">
@@ -50,9 +57,14 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-            <div class="card-header d-flex justify-content-between">
-                <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
-                <span id="chat-room-user-count"></span>
+            <div class="card-header">
+                <div>
+                    <div id="chatroom-user-socket-id"></div>
+                    <div class="d-flex justify-content-between">
+                        <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
+                        <span id="chat-room-user-count"></span>
+                    </div>
+                </div>
             </div>
 
                 <div class="card-body">
@@ -92,6 +104,14 @@
             host: `{{ config('broadcasting.sockets.default.host') }}:{{ config('broadcasting.sockets.default.port') }}`,
             transports: JSON.parse(decodeURIComponent('{{ rawurlencode(json_encode(config('broadcasting.sockets.default.transports'))) }}')),
             client: socketio
+        });
+
+        // listen socket connect event via socketio-client
+        Echo.connector.socket.on('connect', () => {
+            // show socket id
+            const socketId = `socket.id: ${Echo.connector.socket.id}`;
+            document.querySelector('#announcement-user-socket-id').textContent = socketId;
+            document.querySelector('#chatroom-user-socket-id').textContent = socketId;
         });
 
         // Announcement
