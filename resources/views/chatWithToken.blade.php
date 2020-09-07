@@ -137,12 +137,21 @@
         }
 
         const getSocketConn = ({ name = 'default', host = null, accessToken = null }) => {
-            const existsConn = storeInfo.socketConns[name];
+            let existsConn = storeInfo.socketConns[name];
             if (!existsConn) {
-                storeInfo.socketConns[name] = buildSocketConn({ host, accessToken });
-            }
 
-            return storeInfo.socketConns[name];
+                storeInfo.socketConns[name] = buildSocketConn({ host, accessToken });
+                existsConn = storeInfo.socketConns[name];
+
+                existsConn.on('connect', () => {
+                    // show socket id
+                    const socketId = `socket.id: ${existsConn.id}`;
+
+                    document.querySelector('#announcement-user-socket-id').textContent = socketId;
+                    document.querySelector('#chatroom-user-socket-id').textContent = socketId;
+                });
+            }
+            return existsConn;
         };
 
         // Exchange access token
@@ -204,7 +213,8 @@
        ((storeInfo) => {
             const announcementChannel = 'App.Announcement';
             const auth = {};
-            const socketIo = getSocketConn({ name: 'announcement' });
+            const connName = 'singleton';
+            const socketIo = getSocketConn({ name: connName });
 
             socketIo.emit('subscribe', {
                 channel: announcementChannel,
@@ -234,13 +244,6 @@
 
                 console.log(`[app.announcement.created] id: ${data.id}, content: ${data.content}`);
             });
-
-            socketIo.on('connect', (channel, users) => {
-                // show socket id
-                const socketId = document.createTextNode(`socket.id: ${socketIo.id}`);
-                document.querySelector('#announcement-user-socket-id').appendChild(socketId);
-            });
-
        })(storeInfo);
 
         // send announcement via api contoller
@@ -363,13 +366,8 @@
         const connectPartyChatRoom = () => {
             const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
             const auth = buildSocketConnAuthHeader({ accessToken: storeInfo.token.access_token });
-            const socketIo = getSocketConn({ name: partyRoomChannel });
-
-            socketIo.on('connect', (channel, users) => {
-                // show socket id
-                const socketId = document.createTextNode(`socket.id: ${socketIo.id}`);
-                document.querySelector('#chatroom-user-socket-id').appendChild(socketId);
-            });
+            const connName = 'singleton';
+            const socketIo = getSocketConn({ name: connName });
 
             socketIo.emit('subscribe', {
                 channel: partyRoomChannel,
@@ -456,7 +454,8 @@
 
             const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
             const eventName = 'send-message-via-socket';
-            const socketIo = getSocketConn({ name: partyRoomChannel });
+            const connName = 'singleton';
+            const socketIo = getSocketConn({ name: connName });
 
             // emit the `client event` will only be broadcast to every sockets but the sender.
             // ref https://socket.io/docs/server-api/#Flag-%E2%80%98broadcast%E2%80%99
