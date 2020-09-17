@@ -53,7 +53,7 @@ class PartyRoomMessageUserTypingIndicator implements ShouldBroadcast
             'sender_name' => $this->message->sender_name,
             'party_id' => $this->message->party_id,
             'room_id' => $this->message->room_id,
-            'is_typing' => $this->message->is_typing,
+            'is_typing' => (bool) $this->message->is_typing,
             'created_at' => $this->message->created_at->format('Y-m-d H:i:s'),
             'created_at_timestamp' => $this->message->created_at,
         ];
