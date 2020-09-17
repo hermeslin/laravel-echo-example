@@ -412,7 +412,7 @@
                 }
 
                 storeInfo.userTypingList = userTypingList;
-                const typingString = `${(userTypingList.length > 0) ? userTypingList.join(', ') : ''} ${(userTypingList.length > 1) ? 'are typing..' : 'is typing..'}`;
+                const typingString = `${(userTypingList.length > 0) ? userTypingList.join(', ') : 'NOBODY~~'} ${(userTypingList.length > 1) ? 'are' : 'is'} typing..`;
                 document.querySelector('#chatroom-user-typing-indicator').textContent = typingString ;
             });
 
