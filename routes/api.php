@@ -21,6 +21,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('/broadcast-announcement', 'AnnouncementController@broadcast')->name('api-broadcast-announcement');
     Route::post('/party/{partyId}/room/{roomId}/message', 'PartyRoomMessageController@create')->name('api-create-party-room-message');
+    Route::post('/party/{partyId}/room/{roomId}/message/user-typing-indicator', 'PartyRoomMessageController@userTypingIndicator')->name('api-set-party-room-message-user-typing-indicator');
 
     Route::match(
         ['get', 'post'],

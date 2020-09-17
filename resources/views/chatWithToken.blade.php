@@ -69,6 +69,9 @@
                             <span id="chat-room-user-count"></span>
                         </div>
                     </div>
+                    <div>
+                        <div id="chatroom-user-typing-indicator"></div>
+                    </div>
                 </div>
 
                 <div class="card-body">
@@ -110,6 +113,8 @@
             partyId: '{{ $partyId }}',
             token: null,
             socketConns: [],
+            userTypingList: [],
+            isTyping: false,
         };
 
         const buildSocketConnAuthHeader = ({ accessToken = null }) => {
@@ -391,6 +396,26 @@
                 console.log(`[party.room.message.created] channel: ${channel}, id: ${message.id}, content: ${message.content}`);
             });
 
+            socketIo.on('party.room.message.user.typing.indicator', (channel, message) => {
+                if (channel !== partyRoomChannel) {
+                    console.log('subscribe wrong channel, wtf?');
+                    return;
+                }
+
+                let userTypingList = storeInfo.userTypingList;
+                if (message.is_typing) {
+                    userTypingList = [...new Set([...userTypingList, message.sender_name])];
+                } else {
+                    userTypingList = userTypingList.filter(
+                        value => message.sender_name !== value
+                    );
+                }
+
+                storeInfo.userTypingList = userTypingList;
+                const typingString = `${(userTypingList.length > 0) ? userTypingList.join(', ') : 'nobody'} ${(userTypingList.length > 1) ? 'are' : 'is'} typing..`;
+                document.querySelector('#chatroom-user-typing-indicator').textContent = typingString ;
+            });
+
             socketIo.on('client-send-message-via-socket', (channel, data) => {
                 const msgNode = genMsgNode({
                     sender_name: data.sender_name,
@@ -469,6 +494,39 @@
             // append message by ourself
             const msgNode = genMsgNode(data);
             appendMsg('#chat-room-message-list', msgNode);
+        });
+
+        //
+        document.querySelector('#chat-room-message-1')
+        .addEventListener('input', async (event) => {
+            if (!storeInfo.token) {
+                console.log('exchange your access token first.');
+                return false;
+            }
+            const message = event.target.value;
+            const isTyping = message.length > 0;
+            if (storeInfo.isTyping !== isTyping) {
+                storeInfo.isTyping = isTyping;
+                try {
+                    const url  =  "{{ route('api-set-party-room-message-user-typing-indicator', ['partyId' => $partyId, 'roomId' => $roomId]) }}"
+                    const response = await axios.post(url,
+                        {
+                            is_typing: isTyping
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${storeInfo.token.access_token}`
+                            }
+                        }
+                    );
+                    console.log({
+                        status: response.status,
+                        data: response.data.message
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
+            }
         });
      });
 </script>
