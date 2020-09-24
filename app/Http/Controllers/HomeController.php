@@ -40,8 +40,8 @@ class HomeController extends Controller
      */
     public function chatWithToken()
     {
-        $partyId = 1;
-        $roomId = 1;
+        // $partyId = 1;
+        // $roomId = 1;
 
         return view('chatWithToken', compact(
             'partyId',

@@ -65,11 +65,16 @@
                     <div>
                         <div id="chatroom-user-socket-id"></div>
                         <div class="d-flex justify-content-between">
-                            <span>Party {{ $partyId }} - Chat Room {{ $roomId }}</span>
-                            <span id="chat-room-user-count"></span>
+                            <form class="form-inline">
+                                <input type="text" class="form-control mb-2 mr-sm-2" id="partyId" required="required" placeholder="Party">
+                                <input type="text" class="form-control mb-2 mr-sm-2" id="roomId" required="required" placeholder="Chat Room">
+                                <button type="button" id="join-room" class="btn btn-primary mb-2">Join</button>
+                                <button type="button" id="leave-room" class="btn btn-danger mb-2 d-none">Leave</button>
+                            </form>
                         </div>
                     </div>
                     <div>
+                        <div id="chat-room-user-count"></div>
                         <div id="chatroom-user-typing-indicator"></div>
                     </div>
                 </div>
@@ -109,8 +114,8 @@
 
         const storeInfo = {
             sender: {},
-            roomId: '{{ $roomId }}',
-            partyId: '{{ $partyId }}',
+            roomId: '',
+            partyId: '',
             token: null,
             socketConns: [],
             userTypingList: [],
@@ -197,9 +202,6 @@
                     }
                 );
                 storeInfo.sender = userResponse.data;
-
-                // connet party chat room
-                connectPartyChatRoom();
 
                 document.querySelector('#user-access-token').appendChild(accessTokenText)
                 document.querySelector('div[name=token-changed-block]')
@@ -367,8 +369,47 @@
             }
         });
 
+        // join room
+        document.querySelector('#join-room')
+        .addEventListener('click', (evnet) => {
+            const partyId = document.querySelector('#partyId').value;
+            const roomId = document.querySelector('#roomId').value;
+
+            if (!partyId || !roomId) {
+                return;
+            }
+
+            if (!storeInfo.token || !storeInfo.token.access_token) {
+                return;
+            }
+
+            storeInfo.partyId = partyId;
+            storeInfo.roomId = roomId;
+
+            document.querySelector('#leave-room').classList.remove('d-none');
+            evnet.target.classList.add('d-none');
+            joinPartyChatRoom();
+        });
+
+        // leave room
+        document.querySelector('#leave-room')
+        .addEventListener('click', (evnet) => {
+
+            if (!storeInfo.token || !storeInfo.token.access_token) {
+                return;
+            }
+
+            document.querySelector('#join-room').classList.remove('d-none');
+            evnet.target.classList.add('d-none');
+            leavePartyChatRoom();
+        });
+
         // party chat room cahnnel
-        const connectPartyChatRoom = () => {
+        const joinPartyChatRoom = () => {
+            if (!storeInfo.token || !storeInfo.token.access_token) {
+                return;
+            }
+
             const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
             const auth = buildSocketConnAuthHeader({ accessToken: storeInfo.token.access_token });
             const connName = 'singleton';
@@ -456,6 +497,32 @@
             });
         };
 
+        const leavePartyChatRoom = () => {
+            if (!storeInfo.token || !storeInfo.token.access_token) {
+                return;
+            }
+            const partyRoomChannel = `presence-Party.${storeInfo.partyId}.Room.${storeInfo.roomId}`;
+            const auth = buildSocketConnAuthHeader({ accessToken: storeInfo.token.access_token });
+            const connName = 'singleton';
+            const socketIo = getSocketConn({ name: connName });
+
+            socketIo.off('party.room.message.created');
+            socketIo.off('party.room.message.user.typing.indicator');
+            socketIo.off('client-send-message-via-socket');
+            socketIo.off('presence:subscribed');
+            socketIo.off('presence:joining');
+            socketIo.off('presence:leaving');
+
+            socketIo.emit('unsubscribe', {
+                channel: partyRoomChannel,
+                auth,
+            });
+
+            document.querySelector('#chat-room-user-count').textContent = '';
+            document.querySelector('#chatroom-user-typing-indicator').textContent = '' ;
+            console.log(`you leaved room`);
+        };
+
         // send chat room message via socket
         document.querySelector('#send-chat-room-message-via-socket')
         .addEventListener('click', async (event) => {
@@ -496,7 +563,7 @@
             appendMsg('#chat-room-message-list', msgNode);
         });
 
-        //
+        // typing indicator
         document.querySelector('#chat-room-message-1')
         .addEventListener('input', async (event) => {
             if (!storeInfo.token) {
@@ -508,7 +575,7 @@
             if (storeInfo.isTyping !== isTyping) {
                 storeInfo.isTyping = isTyping;
                 try {
-                    const url  =  "{{ route('api-set-party-room-message-user-typing-indicator', ['partyId' => $partyId, 'roomId' => $roomId]) }}"
+                    const url = `{{ config('app.url') }}/api/party/${storeInfo.partyId}/room/${storeInfo.roomId}/message/user-typing-indicator`;
                     const response = await axios.post(url,
                         {
                             is_typing: isTyping

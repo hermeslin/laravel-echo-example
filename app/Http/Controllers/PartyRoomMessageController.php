@@ -31,8 +31,8 @@ class PartyRoomMessageController extends Controller
         $validator = Validator::make(
             $request->all(),
             $rules = [
-                'partyId' => 'bail|required|in:1',
-                'roomId' => 'bail|required|in:1',
+                'partyId' => 'bail|required',
+                'roomId' => 'bail|required',
                 'message' => 'bail|required|string|min:1',
                 'mode' => 'bail|required|string|in:directly,horizon'
             ]
@@ -93,8 +93,8 @@ class PartyRoomMessageController extends Controller
         $validator = Validator::make(
             $request->all(),
             $rules = [
-                'partyId' => 'bail|required|in:1',
-                'roomId' => 'bail|required|in:1',
+                'partyId' => 'bail|required',
+                'roomId' => 'bail|required',
                 'is_typing' => 'bail|required|boolean',
             ]
         );

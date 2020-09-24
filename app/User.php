@@ -43,23 +43,8 @@ class User extends Authenticatable
      */
     public function canJoin($partyId, $roomId)
     {
-        //
-        $list = [
-            // party_id
-            '1' => [
-                // room_id
-                '1' => [
-                    // user.id
-                    1, 4, 16, 32, 34, 88, 2,10, 15, 41, 101, 127, 165, 200
-                ]
-            ],
-        ];
-
-        $userIdList = $list[$partyId][$roomId];
-        if (is_array($userIdList) && count($userIdList) > 0) {
-            return in_array($this->id, $userIdList);
-        }
-        return false;
+        $userIdList = [1, 4, 16, 32, 34, 88, 2,10, 15, 41, 101, 127, 165, 200];
+        return in_array($this->id, $userIdList);;
     }
 
     /**
