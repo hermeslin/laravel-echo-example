@@ -346,7 +346,7 @@
             }
 
             try {
-                const url  =  "{{ route('api-create-party-room-message', ['partyId' => $partyId, 'roomId' => $roomId]) }}"
+                const url = `{{ config('app.url') }}/api/party/${storeInfo.partyId}/room/${storeInfo.roomId}/message`;
                 const response = await axios.post(url,
                     {
                         message,
@@ -364,6 +364,8 @@
                 });
 
                 messageEle.value = '';
+                const event = new CustomEvent("clearAfterSendMessage", {});
+                messageEle.dispatchEvent(event);
             } catch (error) {
                  console.log(error);
             }
@@ -564,8 +566,7 @@
         });
 
         // typing indicator
-        document.querySelector('#chat-room-message-1')
-        .addEventListener('input', async (event) => {
+        const onTypingCallBack = async (event) => {
             if (!storeInfo.token) {
                 console.log('exchange your access token first.');
                 return false;
@@ -594,7 +595,9 @@
                     console.log(error);
                 }
             }
-        });
+        }
+        document.querySelector('#chat-room-message-1').addEventListener('input', onTypingCallBack, false);
+        document.querySelector('#chat-room-message-1').addEventListener('clearAfterSendMessage', onTypingCallBack, false);
      });
 </script>
 @endsection
