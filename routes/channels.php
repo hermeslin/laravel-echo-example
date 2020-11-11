@@ -1,5 +1,6 @@
 <?php
 use App\Broadcasting\PartyRoomMessageChannel;
+use App\Broadcasting\UserCacheInfoChannel;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,5 @@ Broadcast::channel('User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('Party.{party_id}.Room.{room_id}', PartyRoomMessageChannel::class);
+
+Broadcast::channel('User.Cache.Info',  UserCacheInfoChannel::class);
