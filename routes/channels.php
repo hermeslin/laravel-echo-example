@@ -19,3 +19,5 @@ Broadcast::channel('User.{id}', function ($user, $id) {
 Broadcast::channel('Party.{party_id}.Room.{room_id}', PartyRoomMessageChannel::class);
 
 Broadcast::channel('User.Cache.Info',  UserCacheInfoChannel::class);
+
+Broadcast::channel('Public',  UserCacheInfoChannel::class);
